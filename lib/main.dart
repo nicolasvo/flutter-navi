@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter_map_animations/flutter_map_animations.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,9 +30,14 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  final MapController _mapController = MapController();
+class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
+  // final MapController _mapController = MapController();
   LatLng _currentLocation = const LatLng(0.0, 0.0);
+  late final _animatedMapController = AnimatedMapController(
+    vsync: this,
+    duration: const Duration(milliseconds: 800),
+    curve: Curves.easeInOut,
+  );
 
   @override
   void initState() {
@@ -68,12 +74,12 @@ class _MyHomePageState extends State<MyHomePage> {
     Position position = await Geolocator.getCurrentPosition();
     setState(() {
       _currentLocation = LatLng(position.latitude, position.longitude);
-      _mapController.move(_currentLocation, 14.0);
+      _animatedMapController.animateTo(dest: _currentLocation, zoom: 14.0);
     });
   }
 
   void _resetOrientation() {
-    _mapController.rotate(0.0);
+    _animatedMapController.animatedRotateReset();
   }
 
   @override
@@ -83,7 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
         title: const Text('Flutter Map App'),
       ),
       body: FlutterMap(
-        mapController: _mapController,
+        mapController: _animatedMapController.mapController,
         options: const MapOptions(
           initialCenter: LatLng(48.8575, 2.3514),
           initialZoom: 12.0,
@@ -94,18 +100,26 @@ class _MyHomePageState extends State<MyHomePage> {
                 "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
             subdomains: const ['a', 'b', 'c'],
           ),
-          MarkerLayer(
+          AnimatedMarkerLayer(
             markers: [
-              Marker(
-                point: _currentLocation,
-                width: 80.0,
-                height: 80.0,
-                child: const Icon(
-                  Icons.location_on,
-                  color: Colors.red,
-                  size: 40.0,
-                ),
-              ),
+              AnimatedMarker(
+                  point: _currentLocation,
+                  builder: (_, animation) {
+                    return const Icon(
+                      Icons.person_pin_circle,
+                      color: Colors.blue,
+                      size: 50.0,
+                    );
+                  }),
+              AnimatedMarker(
+                  point: const LatLng(48.8594, 2.3138),
+                  builder: (_, animation) {
+                    return const Icon(
+                      Icons.location_on,
+                      color: Colors.red,
+                      size: 50.0,
+                    );
+                  }),
             ],
           ),
         ],
