@@ -31,7 +31,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
-  // final MapController _mapController = MapController();
   LatLng _currentLocation = const LatLng(0.0, 0.0);
   late final _animatedMapController = AnimatedMapController(
     vsync: this,
@@ -88,53 +87,61 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       appBar: AppBar(
         title: const Text('Flutter Map App'),
       ),
-      body: FlutterMap(
-        mapController: _animatedMapController.mapController,
-        options: const MapOptions(
-          initialCenter: LatLng(48.8575, 2.3514),
-          initialZoom: 12.0,
-        ),
+      body: Stack(
         children: [
-          TileLayer(
-            urlTemplate:
-                "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-            subdomains: const ['a', 'b', 'c'],
-          ),
-          AnimatedMarkerLayer(
-            markers: [
-              AnimatedMarker(
-                  point: _currentLocation,
-                  builder: (_, animation) {
-                    return const Icon(
-                      Icons.person_pin_circle,
-                      color: Colors.blue,
-                      size: 50.0,
-                    );
-                  }),
-              AnimatedMarker(
-                  point: const LatLng(48.8594, 2.3138),
-                  builder: (_, animation) {
-                    return const Icon(
-                      Icons.location_on,
-                      color: Colors.red,
-                      size: 50.0,
-                    );
-                  }),
+          FlutterMap(
+            mapController: _animatedMapController.mapController,
+            options: const MapOptions(
+              initialCenter: LatLng(48.8575, 2.3514),
+              initialZoom: 12.0,
+            ),
+            children: [
+              TileLayer(
+                urlTemplate:
+                    "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+                subdomains: const ['a', 'b', 'c'],
+              ),
+              AnimatedMarkerLayer(
+                markers: [
+                  AnimatedMarker(
+                      point: _currentLocation,
+                      builder: (_, animation) {
+                        return const Icon(
+                          Icons.person_pin_circle,
+                          color: Colors.blue,
+                          size: 50.0,
+                        );
+                      }),
+                  AnimatedMarker(
+                      point: const LatLng(48.8594, 2.3138),
+                      builder: (_, animation) {
+                        return const Icon(
+                          Icons.location_on,
+                          color: Colors.red,
+                          size: 50.0,
+                        );
+                      }),
+                ],
+              ),
             ],
+          ),
+          Positioned(
+            top: 16.0,
+            right: 16.0,
+            child: FloatingActionButton(
+              onPressed: _resetOrientation,
+              child: const Icon(Icons.explore),
+            ),
           ),
         ],
       ),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           FloatingActionButton(
             onPressed: _getCurrentLocation,
             child: const Icon(Icons.my_location),
-          ),
-          const SizedBox(height: 10),
-          FloatingActionButton(
-            onPressed: _resetOrientation,
-            child: const Icon(Icons.explore),
           ),
         ],
       ),
