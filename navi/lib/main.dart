@@ -36,8 +36,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   LatLng _currentLocation = const LatLng(0.0, 0.0);
-  LatLng _destinationLocation =
-      const LatLng(48.850336347484784, 2.296388239183677);
+  late LatLng _destinationLocation;
   List<LatLng> _routeCoords = [];
   late final _animatedMapController = AnimatedMapController(
     vsync: this,
@@ -106,7 +105,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         throw Exception('No routes found');
       }
     }
-    _animatedMapController.animateTo(dest: _destinationLocation, zoom: 14.0);
+    _animatedMapController.animateTo(dest: destination, zoom: 14.0);
   }
 
   List<LatLng> _decodePolyline(String encodedPolyline) {
@@ -177,18 +176,17 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           size: 50.0,
                         );
                       }),
-                  AnimatedMarker(
+                  MyMarker(
                       point: const LatLng(48.8594, 2.3138),
-                      builder: (_, animation) {
-                        return const Icon(
-                          Icons.location_on,
-                          color: Colors.red,
-                          size: 50.0,
-                        );
+                      onTap: (LatLng point) async {
+                        _getRoute(_currentLocation, point);
                       }),
                   MyMarker(
-                    point: const LatLng(48.850336347484784, 2.296388239183677),
-                  ),
+                      point:
+                          const LatLng(48.850336347484784, 2.296388239183677),
+                      onTap: (LatLng point) async {
+                        _getRoute(_currentLocation, point);
+                      }),
                 ],
               ),
               PolylineLayer(
@@ -216,12 +214,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
-            onPressed: () async {
-              _getRoute(_currentLocation, _destinationLocation);
-            },
-            child: const Icon(Icons.directions),
-          ),
-          FloatingActionButton(
             onPressed: _getCurrentLocation,
             child: const Icon(Icons.my_location),
           ),
@@ -234,7 +226,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 class MyMarker extends AnimatedMarker {
   MyMarker({
     required super.point,
-    VoidCallback? onTap,
+    ValueChanged<LatLng>? onTap,
   }) : super(
           width: markerSize,
           height: markerSize,
@@ -242,7 +234,7 @@ class MyMarker extends AnimatedMarker {
             final size = markerSize * animation.value;
 
             return GestureDetector(
-              onTap: onTap,
+              onTap: () => onTap?.call(point),
               child: Opacity(
                 opacity: animation.value,
                 child: Icon(
