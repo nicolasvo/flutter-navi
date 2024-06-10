@@ -2,10 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:http/http.dart' as http;
+
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
-import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const MyApp());
@@ -35,7 +36,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   LatLng _currentLocation = const LatLng(0.0, 0.0);
-  LatLng _destinationLocation = const LatLng(48.8594, 2.3138);
+  LatLng _destinationLocation =
+      const LatLng(48.850336347484784, 2.296388239183677);
   List<LatLng> _routeCoords = [];
   late final _animatedMapController = AnimatedMapController(
     vsync: this,
@@ -46,7 +48,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    // _getCurrentLocation();
+    _getCurrentLocation();
   }
 
   Future<void> _getCurrentLocation() async {
@@ -87,33 +89,60 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   Future<void> _getRoute(LatLng origin, LatLng destination) async {
-    // Make a request to the OSRM backend to get the route between origin and destination
-    // For example, using the http package:
-    final response = await http.get(
-        'http://localhost:6000/route/v1/walking/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}'
-            as Uri);
+    final String url =
+        'http://localhost:6000/route/v1/walking/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?steps=true&alternatives=false&overview=full';
+    print(url);
+    final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
-      // Parse the response and extract the route geometry
-      // For simplicity, assuming the response is JSON with a 'geometry' field containing the route geometry
       final Map<String, dynamic> data = json.decode(response.body);
-      final List<dynamic> coordinates =
-          data['routes'][0]['geometry']['coordinates'];
-      _routeCoords =
-          coordinates.map((coord) => LatLng(coord[1], coord[0])).toList();
-      setState(() {
-        _routeCoords =
-            coordinates.map((coord) => LatLng(coord[1], coord[0])).toList();
-      });
+      final routes = data['routes'] as List<dynamic>;
+      if (routes.isNotEmpty) {
+        final route = routes.first;
+        final geometry = route['geometry'] as String;
+        setState(() {
+          _routeCoords = _decodePolyline(geometry);
+        });
+      } else {
+        throw Exception('No routes found');
+      }
     }
-
-    // For now, using dummy route coordinates
-    // _routeCoords = [
-    //   LatLng(48.8575, 2.3514), // Start point (current location)
-    //   LatLng(48.8594, 2.3138), // End point (destination location)
-    // ];
-
-    // Animate to the destination location
     _animatedMapController.animateTo(dest: _destinationLocation, zoom: 14.0);
+  }
+
+  List<LatLng> _decodePolyline(String encodedPolyline) {
+    List<LatLng> polylineCoordinates = [];
+    int index = 0;
+    int lat = 0;
+    int lng = 0;
+
+    while (index < encodedPolyline.length) {
+      int b;
+      int shift = 0;
+      int result = 0;
+      do {
+        b = encodedPolyline.codeUnitAt(index++) - 63;
+        result |= (b & 0x1F) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+      lat += dlat;
+
+      shift = 0;
+      result = 0;
+      do {
+        b = encodedPolyline.codeUnitAt(index++) - 63;
+        result |= (b & 0x1F) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+      lng += dlng;
+
+      double latitude = lat / 1E5;
+      double longitude = lng / 1E5;
+      LatLng position = LatLng(latitude, longitude);
+      polylineCoordinates.add(position);
+    }
+    return polylineCoordinates;
   }
 
   @override
@@ -143,7 +172,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       builder: (_, animation) {
                         return const Icon(
                           Icons.person_pin_circle,
-                          color: Colors.blue,
+                          // Icons.my_location,
+                          color: Colors.orange,
                           size: 50.0,
                         );
                       }),
@@ -156,13 +186,16 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           size: 50.0,
                         );
                       }),
+                  MyMarker(
+                    point: const LatLng(48.850336347484784, 2.296388239183677),
+                  ),
                 ],
               ),
               PolylineLayer(
                 polylines: [
                   Polyline(
                     points: _routeCoords, // Route coordinates
-                    color: Colors.blue, // Route color
+                    color: Colors.blue.withOpacity(0.7), // Route color
                     strokeWidth: 4.0, // Route width
                   ),
                 ],
@@ -181,8 +214,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       ),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
+          FloatingActionButton(
+            onPressed: () async {
+              _getRoute(_currentLocation, _destinationLocation);
+            },
+            child: const Icon(Icons.directions),
+          ),
           FloatingActionButton(
             onPressed: _getCurrentLocation,
             child: const Icon(Icons.my_location),
@@ -191,4 +229,30 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       ),
     );
   }
+}
+
+class MyMarker extends AnimatedMarker {
+  MyMarker({
+    required super.point,
+    VoidCallback? onTap,
+  }) : super(
+          width: markerSize,
+          height: markerSize,
+          builder: (context, animation) {
+            final size = markerSize * animation.value;
+
+            return GestureDetector(
+              onTap: onTap,
+              child: Opacity(
+                opacity: animation.value,
+                child: Icon(
+                  Icons.location_on,
+                  color: Colors.red,
+                  size: size,
+                ),
+              ),
+            );
+          },
+        );
+  static const markerSize = 50.0;
 }
