@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const MyApp());
@@ -32,6 +35,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   LatLng _currentLocation = const LatLng(0.0, 0.0);
+  LatLng _destinationLocation = const LatLng(48.8594, 2.3138);
+  List<LatLng> _routeCoords = [];
   late final _animatedMapController = AnimatedMapController(
     vsync: this,
     duration: const Duration(milliseconds: 800),
@@ -81,6 +86,36 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     _animatedMapController.animatedRotateReset();
   }
 
+  Future<void> _getRoute(LatLng origin, LatLng destination) async {
+    // Make a request to the OSRM backend to get the route between origin and destination
+    // For example, using the http package:
+    final response = await http.get(
+        'http://localhost:6000/route/v1/walking/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}'
+            as Uri);
+    if (response.statusCode == 200) {
+      // Parse the response and extract the route geometry
+      // For simplicity, assuming the response is JSON with a 'geometry' field containing the route geometry
+      final Map<String, dynamic> data = json.decode(response.body);
+      final List<dynamic> coordinates =
+          data['routes'][0]['geometry']['coordinates'];
+      _routeCoords =
+          coordinates.map((coord) => LatLng(coord[1], coord[0])).toList();
+      setState(() {
+        _routeCoords =
+            coordinates.map((coord) => LatLng(coord[1], coord[0])).toList();
+      });
+    }
+
+    // For now, using dummy route coordinates
+    // _routeCoords = [
+    //   LatLng(48.8575, 2.3514), // Start point (current location)
+    //   LatLng(48.8594, 2.3138), // End point (destination location)
+    // ];
+
+    // Animate to the destination location
+    _animatedMapController.animateTo(dest: _destinationLocation, zoom: 14.0);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -121,6 +156,15 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           size: 50.0,
                         );
                       }),
+                ],
+              ),
+              PolylineLayer(
+                polylines: [
+                  Polyline(
+                    points: _routeCoords, // Route coordinates
+                    color: Colors.blue, // Route color
+                    strokeWidth: 4.0, // Route width
+                  ),
                 ],
               ),
             ],
