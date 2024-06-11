@@ -218,6 +218,28 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         _destination = point;
                         _getRoute(_currentLocation, point);
                       }),
+                  MyMarker(
+                      point: const LatLng(43.66770245229727, 7.193406368229463),
+                      icon: Icon(
+                        Icons.location_on,
+                        color: Colors.red,
+                        size: 50.0,
+                      ),
+                      onTap: (LatLng point) async {
+                        _destination = point;
+                        _getRoute(_currentLocation, point);
+                      }),
+                  MyMarker(
+                      point: const LatLng(43.67140346840869, 7.189367666011833),
+                      icon: Icon(
+                        Icons.location_on,
+                        color: Colors.red,
+                        size: 50.0,
+                      ),
+                      onTap: (LatLng point) async {
+                        _destination = point;
+                        _getRoute(_currentLocation, point);
+                      }),
                 ],
               ),
             ],
