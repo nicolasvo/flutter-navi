@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -46,21 +47,37 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     curve: Curves.easeInOut,
   );
   bool _isZoomedIn = false;
+  StreamSubscription<Position>? _positionStreamSubscription;
 
   @override
   void initState() {
     super.initState();
-    _getCurrentLocation();
+    _startPositionStream();
   }
 
-  Future<void> _getCurrentLocation() async {
+  @override
+  void dispose() {
+    super.dispose();
+    _positionStreamSubscription?.cancel();
+  }
+
+  void _centerOnUserLocation() {
+    setState(() {
+      if (_isZoomedIn) {
+        _animatedMapController.animateTo(dest: _currentLocation, zoom: 15.0);
+      } else {
+        _animatedMapController.animateTo(dest: _currentLocation, zoom: 17.0);
+      }
+      _isZoomedIn = !_isZoomedIn;
+    });
+  }
+
+  Future<void> _startPositionStream() async {
     bool serviceEnabled;
     LocationPermission permission;
 
-    // Test if location services are enabled.
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      // Location services are not enabled don't continue
       return Future.error('Location services are disabled.');
     }
 
@@ -68,26 +85,20 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        // Permissions are denied, next time you could try to ask for permissions again
         return Future.error('Location permissions are denied');
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      // Permissions are denied forever, handle appropriately.
       return Future.error(
           'Location permissions are permanently denied, we cannot request permissions.');
     }
 
-    Position position = await Geolocator.getCurrentPosition();
-    setState(() {
-      _currentLocation = LatLng(position.latitude, position.longitude);
-      if (_isZoomedIn) {
-        _animatedMapController.animateTo(dest: _currentLocation, zoom: 15.0);
-      } else {
-        _animatedMapController.animateTo(dest: _currentLocation, zoom: 17.0);
-      }
-      _isZoomedIn = !_isZoomedIn;
+    _positionStreamSubscription =
+        Geolocator.getPositionStream().listen((Position position) {
+      setState(() {
+        _currentLocation = LatLng(position.latitude, position.longitude);
+      });
     });
   }
 
@@ -154,7 +165,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         size: 50.0,
                       ),
                       onTap: (LatLng point) async {
-                        _getCurrentLocation();
+                        _centerOnUserLocation();
                       }),
                   MyMarker(
                       point: const LatLng(48.8594, 2.3138),
@@ -195,7 +206,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
-            onPressed: _getCurrentLocation,
+            onPressed: _centerOnUserLocation,
             child: const Icon(Icons.my_location),
           ),
         ],
