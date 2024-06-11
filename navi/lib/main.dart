@@ -140,25 +140,34 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               ),
               AnimatedMarkerLayer(
                 markers: [
-                  AnimatedMarker(
+                  MyMarker(
                       point: _currentLocation,
-                      rotate: true,
-                      builder: (_, animation) {
-                        return const Icon(
-                          Icons.person_pin_circle,
-                          // Icons.my_location,
-                          color: Colors.orange,
-                          size: 50.0,
-                        );
+                      icon: Icon(
+                        Icons.person_pin_circle,
+                        color: Colors.orange,
+                        size: 50.0,
+                      ),
+                      onTap: (LatLng point) async {
+                        _getCurrentLocation();
                       }),
                   MyMarker(
                       point: const LatLng(48.8594, 2.3138),
+                      icon: Icon(
+                        Icons.location_on,
+                        color: Colors.red,
+                        size: 50.0,
+                      ),
                       onTap: (LatLng point) async {
                         _getRoute(_currentLocation, point);
                       }),
                   MyMarker(
                       point:
                           const LatLng(48.850336347484784, 2.296388239183677),
+                      icon: Icon(
+                        Icons.location_on,
+                        color: Colors.red,
+                        size: 50.0,
+                      ),
                       onTap: (LatLng point) async {
                         _getRoute(_currentLocation, point);
                       }),

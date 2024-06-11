@@ -5,24 +5,16 @@ import 'package:flutter_map_animations/flutter_map_animations.dart';
 class MyMarker extends AnimatedMarker {
   MyMarker({
     required super.point,
+    required Icon icon,
     ValueChanged<LatLng>? onTap,
   }) : super(
           width: markerSize,
           height: markerSize,
           rotate: true,
           builder: (context, animation) {
-            final size = markerSize * animation.value;
-
             return GestureDetector(
               onTap: () => onTap?.call(point),
-              child: Opacity(
-                opacity: animation.value,
-                child: Icon(
-                  Icons.location_on,
-                  color: Colors.red,
-                  size: size,
-                ),
-              ),
+              child: Opacity(opacity: animation.value, child: icon),
             );
           },
         );
