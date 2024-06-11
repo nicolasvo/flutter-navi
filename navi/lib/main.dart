@@ -86,7 +86,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   Future<void> _getRoute(LatLng origin, LatLng destination) async {
     final String url =
         'http://localhost:6000/route/v1/walking/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?steps=true&alternatives=false&overview=full';
-    print(url);
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.body);
@@ -124,6 +123,15 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
                 subdomains: const ['a', 'b', 'c'],
               ),
+              PolylineLayer(
+                polylines: [
+                  Polyline(
+                    points: _routeCoords, // Route coordinates
+                    color: Colors.blue.withOpacity(0.4), // Route color
+                    strokeWidth: 4.0, // Route width
+                  ),
+                ],
+              ),
               AnimatedMarkerLayer(
                 markers: [
                   AnimatedMarker(
@@ -147,15 +155,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       onTap: (LatLng point) async {
                         _getRoute(_currentLocation, point);
                       }),
-                ],
-              ),
-              PolylineLayer(
-                polylines: [
-                  Polyline(
-                    points: _routeCoords, // Route coordinates
-                    color: Colors.blue.withOpacity(0.7), // Route color
-                    strokeWidth: 4.0, // Route width
-                  ),
                 ],
               ),
             ],
