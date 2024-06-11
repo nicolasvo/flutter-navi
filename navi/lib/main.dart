@@ -123,6 +123,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         final route = routes.first;
         final geometry = route['geometry'] as String;
         setState(() {
+          _destination = destination;
           _routeCoords = decodePolyline(geometry);
         });
         final double minLat = _routeCoords
@@ -169,15 +170,19 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
                 subdomains: const ['a', 'b', 'c'],
               ),
-              PolylineLayer(
-                polylines: [
-                  Polyline(
-                    points: _routeCoords, // Route coordinates
-                    color: Colors.blue.withOpacity(0.4), // Route color
-                    strokeWidth: 4.0, // Route width
+              GestureDetector(
+                  child: PolylineLayer(
+                    polylines: [
+                      Polyline(
+                        points: _routeCoords, // Route coordinates
+                        color: Colors.blue.withOpacity(0.4), // Route color
+                        strokeWidth: 4.0, // Route width
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                  onTap: () async {
+                    _getRoute(_currentLocation, _destination!);
+                  }),
               AnimatedMarkerLayer(
                 markers: [
                   MyMarker(
