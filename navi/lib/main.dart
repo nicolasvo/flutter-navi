@@ -43,6 +43,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     duration: const Duration(milliseconds: 800),
     curve: Curves.easeInOut,
   );
+  bool _isZoomedIn = false;
 
   @override
   void initState() {
@@ -79,7 +80,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     Position position = await Geolocator.getCurrentPosition();
     setState(() {
       _currentLocation = LatLng(position.latitude, position.longitude);
-      _animatedMapController.animateTo(dest: _currentLocation, zoom: 14.0);
+      if (_isZoomedIn) {
+        _animatedMapController.animateTo(dest: _currentLocation, zoom: 15.0);
+      } else {
+        _animatedMapController.animateTo(dest: _currentLocation, zoom: 17.0);
+      }
+      _isZoomedIn = !_isZoomedIn;
     });
   }
 
