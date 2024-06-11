@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
+import 'package:navi/utilities.dart';
 
 void main() {
   runApp(const MyApp());
@@ -99,49 +100,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         final route = routes.first;
         final geometry = route['geometry'] as String;
         setState(() {
-          _routeCoords = _decodePolyline(geometry);
+          _routeCoords = decodePolyline(geometry);
         });
       } else {
         throw Exception('No routes found');
       }
     }
     _animatedMapController.animateTo(dest: destination, zoom: 14.0);
-  }
-
-  List<LatLng> _decodePolyline(String encodedPolyline) {
-    List<LatLng> polylineCoordinates = [];
-    int index = 0;
-    int lat = 0;
-    int lng = 0;
-
-    while (index < encodedPolyline.length) {
-      int b;
-      int shift = 0;
-      int result = 0;
-      do {
-        b = encodedPolyline.codeUnitAt(index++) - 63;
-        result |= (b & 0x1F) << shift;
-        shift += 5;
-      } while (b >= 0x20);
-      int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-      lat += dlat;
-
-      shift = 0;
-      result = 0;
-      do {
-        b = encodedPolyline.codeUnitAt(index++) - 63;
-        result |= (b & 0x1F) << shift;
-        shift += 5;
-      } while (b >= 0x20);
-      int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-      lng += dlng;
-
-      double latitude = lat / 1E5;
-      double longitude = lng / 1E5;
-      LatLng position = LatLng(latitude, longitude);
-      polylineCoordinates.add(position);
-    }
-    return polylineCoordinates;
   }
 
   @override
@@ -221,30 +186,4 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       ),
     );
   }
-}
-
-class MyMarker extends AnimatedMarker {
-  MyMarker({
-    required super.point,
-    ValueChanged<LatLng>? onTap,
-  }) : super(
-          width: markerSize,
-          height: markerSize,
-          builder: (context, animation) {
-            final size = markerSize * animation.value;
-
-            return GestureDetector(
-              onTap: () => onTap?.call(point),
-              child: Opacity(
-                opacity: animation.value,
-                child: Icon(
-                  Icons.location_on,
-                  color: Colors.red,
-                  size: size,
-                ),
-              ),
-            );
-          },
-        );
-  static const markerSize = 50.0;
 }
