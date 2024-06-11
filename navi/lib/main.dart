@@ -136,6 +136,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 markers: [
                   AnimatedMarker(
                       point: _currentLocation,
+                      rotate: true,
                       builder: (_, animation) {
                         return const Icon(
                           Icons.person_pin_circle,

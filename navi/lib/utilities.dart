@@ -9,6 +9,7 @@ class MyMarker extends AnimatedMarker {
   }) : super(
           width: markerSize,
           height: markerSize,
+          rotate: true,
           builder: (context, animation) {
             final size = markerSize * animation.value;
 
