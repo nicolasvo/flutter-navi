@@ -1,6 +1,10 @@
 # osrm backend
 ## steps
-- download map at geofabrik.de
+- browse maps. granularities: continent, country, region
+  + [https://download.geofabrik.de/](https://download.geofabrik.de/)
+  + [https://download.geofabrik.de/europe/](https://download.geofabrik.de/europe/)
+  + [https://download.geofabrik.de/europe/france/](https://download.geofabrik.de/europe/france/)
+- download map
 ```
 curl http://download.geofabrik.de/europe/france/ile-de-france-latest.osm.pbf -o ile-de-france-latest.osm.pbf
 ```
