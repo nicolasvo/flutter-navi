@@ -37,7 +37,6 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   LatLng _currentLocation = const LatLng(0.0, 0.0);
-  late LatLng _destinationLocation;
   List<LatLng> _routeCoords = [];
   late final _animatedMapController = AnimatedMapController(
     vsync: this,
@@ -82,10 +81,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       _currentLocation = LatLng(position.latitude, position.longitude);
       _animatedMapController.animateTo(dest: _currentLocation, zoom: 14.0);
     });
-  }
-
-  void _resetOrientation() {
-    _animatedMapController.animatedRotateReset();
   }
 
   Future<void> _getRoute(LatLng origin, LatLng destination) async {
@@ -169,7 +164,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             top: 16.0,
             right: 16.0,
             child: FloatingActionButton(
-              onPressed: _resetOrientation,
+              onPressed: () => _animatedMapController.animatedRotateReset(),
               child: const Icon(Icons.explore),
             ),
           ),
