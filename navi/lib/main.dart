@@ -106,7 +106,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         throw Exception('No routes found');
       }
     }
-    _animatedMapController.animateTo(dest: destination, zoom: 14.0);
+    _animatedMapController.animatedFitCamera(
+        cameraFit: CameraFit.coordinates(
+      coordinates: [origin, destination],
+      padding: const EdgeInsets.all(80),
+    ));
   }
 
   @override
