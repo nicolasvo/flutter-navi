@@ -27,11 +27,7 @@ docker run -it --rm -p 6000:5000 -v $PWD:/data ghcr.io/project-osrm/osrm-backend
 ## example
 endpoints: `walking`, `driving`
 ```
-# lyon
+# notre dame - pantheon
 curl -X GET \
-  'http://localhost:6000/route/v1/walking/2.3522,48.8566;4.8357,45.7640?steps=true&alternatives=false&overview=full'
-
-# invalides 48.8594, 2.3138
-curl -X GET \
-  'http://localhost:6000/route/v1/walking/2.3522,48.8566;2.3138,48.8594?steps=true&alternatives=false&overview=full'
+  'http://localhost:6000/route/v1/walking/2.3492097597830632,48.85358343314296;2.344402048678717,48.846561622616434?steps=true&alternatives=false&overview=full'
 ```
