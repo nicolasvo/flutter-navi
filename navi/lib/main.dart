@@ -48,6 +48,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   );
   bool _isZoomedIn = false;
   StreamSubscription<Position>? _positionStreamSubscription;
+  LatLng? _destination;
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -57,8 +59,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    super.dispose();
     _positionStreamSubscription?.cancel();
+    _debounce?.cancel();
+    super.dispose();
   }
 
   void _centerOnUserLocation() {
@@ -99,6 +102,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       setState(() {
         _currentLocation = LatLng(position.latitude, position.longitude);
       });
+      if (_destination != null) {
+        print('recalculating...');
+        _debounce?.cancel();
+        _debounce = Timer(const Duration(seconds: 5), () {
+          _getRoute(_currentLocation, _destination!);
+        });
+      }
     });
   }
 
@@ -136,7 +146,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         children: [
           FlutterMap(
             mapController: _animatedMapController.mapController,
-            options: const MapOptions(
+            options: MapOptions(
               initialCenter: LatLng(48.8575, 2.3514),
               initialZoom: 12.0,
             ),
@@ -175,6 +185,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         size: 50.0,
                       ),
                       onTap: (LatLng point) async {
+                        _destination = point;
                         _getRoute(_currentLocation, point);
                       }),
                   MyMarker(
@@ -186,6 +197,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         size: 50.0,
                       ),
                       onTap: (LatLng point) async {
+                        _destination = point;
                         _getRoute(_currentLocation, point);
                       }),
                 ],
