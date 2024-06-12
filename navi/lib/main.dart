@@ -1,14 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:http/http.dart' as http;
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
+import 'package:flutter_compass/flutter_compass.dart';
+
 import 'package:navi/utilities.dart';
 
 void main() async {
@@ -50,11 +51,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   StreamSubscription<Position>? _positionStreamSubscription;
   LatLng? _destination;
   Timer? _debounce;
+  double _heading = 0.0;
 
   @override
   void initState() {
     super.initState();
     _startPositionStream();
+    _startCompass();
   }
 
   @override
@@ -112,6 +115,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     });
   }
 
+  void _startCompass() {
+    FlutterCompass.events!.listen((CompassEvent event) {
+      setState(() {
+        _heading = event.heading!;
+      });
+    });
+  }
+
   Future<void> _getRoute(LatLng origin, LatLng destination) async {
     final String url =
         '${dotenv.env['OSRM_BACKEND_URL']}/route/v1/walking/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?steps=true&alternatives=false&overview=full';
@@ -123,31 +134,17 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         final route = routes.first;
         final geometry = route['geometry'] as String;
         setState(() {
-          _destination = destination;
           _routeCoords = decodePolyline(geometry);
         });
-        final double minLat = _routeCoords
-            .map((coord) => coord.latitude)
-            .reduce((a, b) => a < b ? a : b);
-        final double maxLat = _routeCoords
-            .map((coord) => coord.latitude)
-            .reduce((a, b) => a > b ? a : b);
-        final double minLng = _routeCoords
-            .map((coord) => coord.longitude)
-            .reduce((a, b) => a < b ? a : b);
-        final double maxLng = _routeCoords
-            .map((coord) => coord.longitude)
-            .reduce((a, b) => a > b ? a : b);
-
-        _animatedMapController.animatedFitCamera(
-            cameraFit: CameraFit.coordinates(
-          coordinates: [LatLng(minLat, minLng), LatLng(maxLat, maxLng)],
-          padding: const EdgeInsets.all(80),
-        ));
       } else {
         throw Exception('No routes found');
       }
     }
+    _animatedMapController.animatedFitCamera(
+        cameraFit: CameraFit.coordinates(
+      coordinates: [origin, destination],
+      padding: const EdgeInsets.all(80),
+    ));
   }
 
   @override
@@ -170,76 +167,51 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
                 subdomains: const ['a', 'b', 'c'],
               ),
-              GestureDetector(
-                  child: PolylineLayer(
-                    polylines: [
-                      Polyline(
-                        points: _routeCoords, // Route coordinates
-                        color: Colors.blue.withOpacity(0.4), // Route color
-                        strokeWidth: 4.0, // Route width
-                      ),
-                    ],
+              PolylineLayer(
+                polylines: [
+                  Polyline(
+                    points: _routeCoords, // Route coordinates
+                    color: Colors.blue.withOpacity(0.4), // Route color
+                    strokeWidth: 4.0, // Route width
                   ),
-                  onTap: () async {
-                    _getRoute(_currentLocation, _destination!);
-                  }),
+                ],
+              ),
               AnimatedMarkerLayer(
                 markers: [
                   MyMarker(
+                    point: _currentLocation,
+                    icon: UserLocationMarker(
                       point: _currentLocation,
-                      icon: Icon(
-                        Icons.person_pin_circle,
-                        color: Colors.orange,
-                        size: 50.0,
-                      ),
-                      onTap: (LatLng point) async {
-                        _centerOnUserLocation();
-                      }),
+                      heading: _heading,
+                    ),
+                    onTap: (LatLng point) async {
+                      _centerOnUserLocation();
+                    },
+                  ),
                   MyMarker(
-                      point: const LatLng(48.8594, 2.3138),
-                      icon: Icon(
-                        Icons.location_on,
-                        color: Colors.red,
-                        size: 50.0,
-                      ),
-                      onTap: (LatLng point) async {
-                        _destination = point;
-                        _getRoute(_currentLocation, point);
-                      }),
+                    point: const LatLng(48.8594, 2.3138),
+                    icon: Icon(
+                      Icons.location_on,
+                      color: Colors.red,
+                      size: 50.0,
+                    ),
+                    onTap: (LatLng point) async {
+                      _destination = point;
+                      _getRoute(_currentLocation, point);
+                    },
+                  ),
                   MyMarker(
-                      point:
-                          const LatLng(48.85272284500543, 2.3031675776474687),
-                      icon: Icon(
-                        Icons.location_on,
-                        color: Colors.red,
-                        size: 50.0,
-                      ),
-                      onTap: (LatLng point) async {
-                        _destination = point;
-                        _getRoute(_currentLocation, point);
-                      }),
-                  MyMarker(
-                      point: const LatLng(43.66770245229727, 7.193406368229463),
-                      icon: Icon(
-                        Icons.location_on,
-                        color: Colors.red,
-                        size: 50.0,
-                      ),
-                      onTap: (LatLng point) async {
-                        _destination = point;
-                        _getRoute(_currentLocation, point);
-                      }),
-                  MyMarker(
-                      point: const LatLng(43.67140346840869, 7.189367666011833),
-                      icon: Icon(
-                        Icons.location_on,
-                        color: Colors.red,
-                        size: 50.0,
-                      ),
-                      onTap: (LatLng point) async {
-                        _destination = point;
-                        _getRoute(_currentLocation, point);
-                      }),
+                    point: const LatLng(48.85608312652121, 2.297967035877974),
+                    icon: Icon(
+                      Icons.location_on,
+                      color: Colors.red,
+                      size: 50.0,
+                    ),
+                    onTap: (LatLng point) async {
+                      _destination = point;
+                      _getRoute(_currentLocation, point);
+                    },
+                  ),
                 ],
               ),
             ],

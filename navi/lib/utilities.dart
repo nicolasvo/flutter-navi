@@ -5,7 +5,7 @@ import 'package:flutter_map_animations/flutter_map_animations.dart';
 class MyMarker extends AnimatedMarker {
   MyMarker({
     required super.point,
-    required Icon icon,
+    required Widget icon,
     ValueChanged<LatLng>? onTap,
   }) : super(
           width: markerSize,
@@ -18,7 +18,35 @@ class MyMarker extends AnimatedMarker {
             );
           },
         );
-  static const markerSize = 50.0;
+  static const markerSize = 40.0;
+}
+
+class UserLocationMarker extends StatelessWidget {
+  final LatLng point;
+  final double heading;
+
+  const UserLocationMarker({
+    Key? key,
+    required this.point,
+    required this.heading,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Transform.rotate(
+          angle: heading * (3.141592653589793 / 180),
+          child: Icon(
+            Icons.navigation,
+            color: Colors.blue,
+            size: 40.0,
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 List<LatLng> decodePolyline(String encodedPolyline) {
