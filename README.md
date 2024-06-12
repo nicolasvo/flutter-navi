@@ -2,3 +2,5 @@
 - set navi/.env OSRM backend URL
 - set location markers
 - build app
+
+<img src="screenshot.png" height="800">
