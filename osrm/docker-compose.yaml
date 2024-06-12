@@ -1,0 +1,9 @@
+version: '3'
+services:
+  osrm:
+    image: ghcr.io/project-osrm/osrm-backend:v5.27.1
+    volumes:
+      - $PWD:/data
+    ports:
+      - "6000:5000"
+    command: osrm-routed --algorithm mld /data/ile-de-france-latest.osrm
