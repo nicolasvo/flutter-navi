@@ -9,11 +9,15 @@ import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:flutter_compass/flutter_compass.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 
 import 'package:navi/utilities.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
+  WidgetsFlutterBinding.ensureInitialized();
+  await FMTCObjectBoxBackend().initialise();
+  await FMTCStore('mapStore').manage.create();
   runApp(const MyApp());
 }
 
@@ -167,6 +171,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 urlTemplate:
                     "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
                 subdomains: const ['a', 'b', 'c'],
+                tileProvider: FMTCStore("mapStore").getTileProvider(),
               ),
               GestureDetector(
                   child: PolylineLayer(
