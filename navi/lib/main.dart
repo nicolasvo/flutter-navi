@@ -160,6 +160,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             options: MapOptions(
               initialCenter: LatLng(43.676902528460204, 7.176964407768331),
               initialZoom: 12.0,
+              interactionOptions: InteractionOptions(enableMultiFingerGestureRace: true,),
             ),
             children: [
               TileLayer(
