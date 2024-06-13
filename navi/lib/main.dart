@@ -109,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         print('recalculating...');
         _debounce?.cancel();
         _debounce = Timer(const Duration(seconds: 5), () {
-          _getRoute(_currentLocation, _destination!);
+          _getRoute(_currentLocation, _destination!, recenter: false);
         });
       }
     });
@@ -123,7 +123,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     });
   }
 
-  Future<void> _getRoute(LatLng origin, LatLng destination) async {
+  Future<void> _getRoute(LatLng origin, LatLng destination,
+      {bool recenter = true}) async {
     final String url =
         '${dotenv.env['OSRM_BACKEND_URL']}/route/v1/walking/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?steps=true&alternatives=false&overview=full';
     final response = await http.get(Uri.parse(url));
@@ -141,25 +142,23 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         throw Exception('No routes found');
       }
     }
-    _animatedMapController.animatedFitCamera(
-        cameraFit: CameraFit.coordinates(
-      coordinates: [origin, destination],
-      padding: const EdgeInsets.all(80),
-    ));
+    if (recenter)
+      _animatedMapController.animatedFitCamera(
+          cameraFit: CameraFit.coordinates(
+        coordinates: [origin, destination],
+        padding: const EdgeInsets.all(80),
+      ));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Flutter Map App'),
-      ),
       body: Stack(
         children: [
           FlutterMap(
             mapController: _animatedMapController.mapController,
             options: MapOptions(
-              initialCenter: LatLng(48.8575, 2.3514),
+              initialCenter: LatLng(43.676902528460204, 7.176964407768331),
               initialZoom: 12.0,
             ),
             children: [
@@ -217,12 +216,48 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       _getRoute(_currentLocation, point);
                     },
                   ),
+                  MyMarker(
+                    point: const LatLng(43.65905756427601, 7.1953319013893084),
+                    icon: Icon(
+                      Icons.location_on,
+                      color: Colors.red,
+                      size: 50.0,
+                    ),
+                    onTap: (LatLng point) async {
+                      _destination = point;
+                      _getRoute(_currentLocation, point);
+                    },
+                  ),
+                  MyMarker(
+                    point: const LatLng(43.69506468906737, 7.268872874437284),
+                    icon: Icon(
+                      Icons.location_on,
+                      color: Colors.red,
+                      size: 50.0,
+                    ),
+                    onTap: (LatLng point) async {
+                      _destination = point;
+                      _getRoute(_currentLocation, point);
+                    },
+                  ),
+                  MyMarker(
+                    point: const LatLng(43.65694065307015, 7.183261174229134),
+                    icon: Icon(
+                      Icons.location_on,
+                      color: Colors.red,
+                      size: 50.0,
+                    ),
+                    onTap: (LatLng point) async {
+                      _destination = point;
+                      _getRoute(_currentLocation, point);
+                    },
+                  ),
                 ],
               ),
             ],
           ),
           Positioned(
-            top: 16.0,
+            top: 60.0,
             right: 16.0,
             child: FloatingActionButton(
               onPressed: () => _animatedMapController.animatedRotateReset(),
