@@ -1,4 +1,3 @@
-version: '3'
 services:
   osrm:
     image: ghcr.io/project-osrm/osrm-backend:v5.27.1
