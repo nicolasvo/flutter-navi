@@ -195,8 +195,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     ],
                   ),
                   onTap: () async {
-                    // _getRoute(_current
-                    //Location, _destination!);
+                    _getRoute(_currentLocation!, _destination!);
                   }),
               AnimatedMarkerLayer(
                 markers: [
