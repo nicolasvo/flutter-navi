@@ -10,6 +10,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:shimmer/shimmer.dart';
 
 import 'package:navi/utilities.dart';
 
@@ -44,7 +45,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
-  LatLng _currentLocation = const LatLng(0.0, 0.0);
+  LatLng? _currentLocation;
   List<LatLng> _routeCoords = [];
   late final _animatedMapController = AnimatedMapController(
     vsync: this,
@@ -121,7 +122,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         print('recalculating...');
         _debounce?.cancel();
         _debounce = Timer(const Duration(seconds: 5), () {
-          _getRoute(_currentLocation, _destination!, recenter: false);
+          _getRoute(_currentLocation!, _destination!, recenter: false);
         });
       }
     });
@@ -194,20 +195,22 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     ],
                   ),
                   onTap: () async {
-                    _getRoute(_currentLocation, _destination!);
+                    // _getRoute(_current
+                    //Location, _destination!);
                   }),
               AnimatedMarkerLayer(
                 markers: [
-                  MyMarker(
-                    point: _currentLocation,
-                    icon: UserLocationMarker(
-                      point: _currentLocation,
-                      heading: _heading,
+                  if (_currentLocation != null)
+                    MyMarker(
+                      point: _currentLocation!,
+                      icon: UserLocationMarker(
+                        point: _currentLocation!,
+                        heading: _heading,
+                      ),
+                      onTap: (LatLng point) async {
+                        _centerOnUserLocation();
+                      },
                     ),
-                    onTap: (LatLng point) async {
-                      _centerOnUserLocation();
-                    },
-                  ),
                   MyMarker(
                     point: const LatLng(48.8594, 2.3138),
                     icon: Icon(
@@ -217,7 +220,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     ),
                     onTap: (LatLng point) async {
                       _destination = point;
-                      _getRoute(_currentLocation, point);
+                      _getRoute(_currentLocation!, point);
                     },
                   ),
                   MyMarker(
@@ -229,7 +232,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     ),
                     onTap: (LatLng point) async {
                       _destination = point;
-                      _getRoute(_currentLocation, point);
+                      _getRoute(_currentLocation!, point);
                     },
                   ),
                   MyMarker(
@@ -241,7 +244,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     ),
                     onTap: (LatLng point) async {
                       _destination = point;
-                      _getRoute(_currentLocation, point);
+                      _getRoute(_currentLocation!, point);
                     },
                   ),
                   MyMarker(
@@ -253,7 +256,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     ),
                     onTap: (LatLng point) async {
                       _destination = point;
-                      _getRoute(_currentLocation, point);
+                      _getRoute(_currentLocation!, point);
                     },
                   ),
                   MyMarker(
@@ -265,7 +268,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     ),
                     onTap: (LatLng point) async {
                       _destination = point;
-                      _getRoute(_currentLocation, point);
+                      _getRoute(_currentLocation!, point);
                     },
                   ),
                 ],
@@ -286,17 +289,51 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 child: const Icon(Icons.explore),
               ),
             ),
+          if (_currentLocation == null)
+            Column(
+              children: [
+                SizedBox(
+                  height: 80,
+                ),
+                Center(
+                  child: Container(
+                    decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.all(Radius.circular(30))),
+                    child: Padding(
+                      padding: const EdgeInsets.all(14.0),
+                      child: Shimmer.fromColors(
+                        baseColor: Colors.white,
+                        highlightColor: Colors.blueAccent,
+                        child: Text(
+                          "Searching for location...",
+                          style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )
         ],
       ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            onPressed: _centerOnUserLocation,
-            child: const Icon(Icons.my_location),
-          ),
-        ],
-      ),
+      floatingActionButton: (_currentLocation != null)
+          ? FloatingActionButton(
+              onPressed: _centerOnUserLocation,
+              child: const Icon(Icons.my_location),
+            )
+          : FloatingActionButton(
+              onPressed: null,
+              child: Padding(
+                padding: const EdgeInsets.all(14.0),
+                child: CircularProgressIndicator(
+                  strokeWidth: 6,
+                ),
+              ),
+            ),
     );
   }
 }
