@@ -52,6 +52,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     curve: Curves.easeInOut,
   );
   bool _isZoomedIn = false;
+  bool _orientationChanged = false;
   StreamSubscription<Position>? _positionStreamSubscription;
   LatLng? _destination;
   Timer? _debounce;
@@ -62,6 +63,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     super.initState();
     _startPositionStream();
     _startCompass();
+    _animatedMapController.mapController.mapEventStream.listen((event) {
+      if (event is MapEventRotate) {
+        setState(() {
+          _orientationChanged = _animatedMapController.rotation != 0.0;
+        });
+      }
+    });
   }
 
   @override
@@ -164,7 +172,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             options: MapOptions(
               initialCenter: LatLng(43.676902528460204, 7.176964407768331),
               initialZoom: 12.0,
-              interactionOptions: InteractionOptions(enableMultiFingerGestureRace: true,),
+              interactionOptions: InteractionOptions(
+                enableMultiFingerGestureRace: true,
+              ),
             ),
             children: [
               TileLayer(
@@ -262,14 +272,20 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               ),
             ],
           ),
-          Positioned(
-            top: 60.0,
-            right: 16.0,
-            child: FloatingActionButton(
-              onPressed: () => _animatedMapController.animatedRotateReset(),
-              child: const Icon(Icons.explore),
+          if (_orientationChanged)
+            Positioned(
+              top: 60.0,
+              right: 16.0,
+              child: FloatingActionButton(
+                onPressed: () {
+                  _animatedMapController.animatedRotateReset();
+                  setState(() {
+                    _orientationChanged = false;
+                  });
+                },
+                child: const Icon(Icons.explore),
+              ),
             ),
-          ),
         ],
       ),
       floatingActionButton: Column(
