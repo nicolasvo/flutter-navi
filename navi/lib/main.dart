@@ -326,7 +326,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   ),
                 ],
               ),
-            if (_destination != null) ...[
+            if (_destination != null &&
+                _duration != null &&
+                _distance != null) ...[
               Column(
                 children: [
                   SizedBox(
@@ -336,7 +338,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     child: Container(
                       decoration: BoxDecoration(
                           color: Colors.blue,
-                          borderRadius: BorderRadius.all(Radius.circular(30))),
+                          borderRadius: BorderRadius.all(Radius.circular(20))),
                       child: Padding(
                         padding: const EdgeInsets.all(14.0),
                         child: Text(
@@ -353,7 +355,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 ],
               ),
               Positioned(
-                bottom: 50,
+                top: 60.0,
                 left: 16.0,
                 child: FloatingActionButton(
                   onPressed: () {
