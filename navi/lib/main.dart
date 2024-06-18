@@ -188,19 +188,20 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   subdomains: const ['a', 'b', 'c'],
                   tileProvider: FMTCStore("mapStore").getTileProvider(),
                 ),
-                GestureDetector(
-                    child: PolylineLayer(
-                      polylines: [
-                        Polyline(
-                          points: _routeCoords, // Route coordinates
-                          color: Colors.blue.withOpacity(0.4), // Route color
-                          strokeWidth: 4.0, // Route width
-                        ),
-                      ],
-                    ),
-                    onTap: () async {
-                      _getRoute(_currentLocation!, _destination!);
-                    }),
+                if (_destination != null)
+                  GestureDetector(
+                      child: PolylineLayer(
+                        polylines: [
+                          Polyline(
+                            points: _routeCoords, // Route coordinates
+                            color: Colors.blue.withOpacity(0.4), // Route color
+                            strokeWidth: 4.0, // Route width
+                          ),
+                        ],
+                      ),
+                      onTap: () async {
+                        _getRoute(_currentLocation!, _destination!);
+                      }),
                 AnimatedMarkerLayer(
                   markers: [
                     if (_currentLocation != null)
@@ -322,7 +323,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   ),
                 ],
               ),
-            if (_destination != null)
+            if (_destination != null) ...[
               Column(
                 children: [
                   SizedBox(
@@ -346,7 +347,21 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     ),
                   ),
                 ],
-              )
+              ),
+              Positioned(
+                bottom: 50,
+                left: 16.0,
+                child: FloatingActionButton(
+                  onPressed: () {
+                    _animatedMapController.animatedZoomOut();
+                    setState(() {
+                      _destination = null;
+                    });
+                  },
+                  child: const Icon(Icons.cancel_outlined),
+                ),
+              ),
+            ]
           ],
         ),
         floatingActionButton:
