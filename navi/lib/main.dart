@@ -60,6 +60,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   Timer? _debounce;
   double _heading = 0.0;
   String? _duration;
+  String? _distance;
 
   @override
   void initState() {
@@ -150,10 +151,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         final route = routes.first;
         final geometry = route['geometry'] as String;
         final duration = formatDuration(route['duration']);
+        final distance = formatDistance(route['distance'].toDouble());
         setState(() {
           _destination = destination;
           _routeCoords = decodePolyline(geometry);
           _duration = duration;
+          _distance = distance;
         });
       } else {
         throw Exception('No routes found');
@@ -337,11 +340,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       child: Padding(
                         padding: const EdgeInsets.all(14.0),
                         child: Text(
-                          "Duration: $_duration",
+                          "$_duration\n$_distance",
                           style: TextStyle(
                               fontSize: 16,
                               color: Colors.white,
                               fontWeight: FontWeight.w700),
+                          textAlign: TextAlign.center,
                         ),
                       ),
                     ),

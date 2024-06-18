@@ -92,10 +92,20 @@ String formatDuration(double seconds) {
   if (hours < 1 && minutes < 1) {
     return '${seconds}s';
   } else if (hours < 1) {
-    return '${minutes}m';
+    return '${minutes}min';
   } else if (hours > 1) {
-    return '${hours}h${minutes}m';
+    return '${hours}h${minutes}min';
   } else {
-    return '${hours}h${minutes}m';
+    return '${hours}h${minutes}min';
+  }
+}
+
+String formatDistance(double distance) {
+  var distanceKm = distance / 1000;
+
+  if (distanceKm < 1) {
+    return '${(distance / 1000).round()}m';
+  } else {
+    return '${distanceKm.toStringAsFixed(1)}km';
   }
 }
