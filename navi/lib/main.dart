@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -58,6 +59,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   LatLng? _destination;
   Timer? _debounce;
   double _heading = 0.0;
+  String? _duration;
 
   @override
   void initState() {
@@ -147,9 +149,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       if (routes.isNotEmpty) {
         final route = routes.first;
         final geometry = route['geometry'] as String;
+        final duration = formatDuration(route['duration']);
         setState(() {
           _destination = destination;
           _routeCoords = decodePolyline(geometry);
+          _duration = duration;
         });
       } else {
         throw Exception('No routes found');
@@ -312,6 +316,31 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                 color: Colors.white,
                                 fontWeight: FontWeight.w700),
                           ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            if (_destination != null)
+              Column(
+                children: [
+                  SizedBox(
+                    height: 80,
+                  ),
+                  Center(
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.all(Radius.circular(30))),
+                      child: Padding(
+                        padding: const EdgeInsets.all(14.0),
+                        child: Text(
+                          "Duration: $_duration",
+                          style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700),
                         ),
                       ),
                     ),

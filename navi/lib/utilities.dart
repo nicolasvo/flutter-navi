@@ -84,3 +84,18 @@ List<LatLng> decodePolyline(String encodedPolyline) {
   }
   return polylineCoordinates;
 }
+
+String formatDuration(double seconds) {
+  var hours = (seconds / 3600).round();
+  var minutes = (seconds % 3600) ~/ 60;
+
+  if (hours < 1 && minutes < 1) {
+    return '${seconds}s';
+  } else if (hours < 1) {
+    return '${minutes}m';
+  } else if (hours > 1) {
+    return '${hours}h${minutes}m';
+  } else {
+    return '${hours}h${minutes}m';
+  }
+}
