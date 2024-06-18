@@ -166,173 +166,200 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          FlutterMap(
-            mapController: _animatedMapController.mapController,
-            options: MapOptions(
-              initialCenter: LatLng(43.676902528460204, 7.176964407768331),
-              initialZoom: 12.0,
-              interactionOptions: InteractionOptions(
-                enableMultiFingerGestureRace: true,
+        body: Stack(
+          children: [
+            FlutterMap(
+              mapController: _animatedMapController.mapController,
+              options: MapOptions(
+                initialCenter: LatLng(43.676902528460204, 7.176964407768331),
+                initialZoom: 12.0,
+                interactionOptions: InteractionOptions(
+                  enableMultiFingerGestureRace: true,
+                ),
               ),
-            ),
-            children: [
-              TileLayer(
-                urlTemplate:
-                    "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-                subdomains: const ['a', 'b', 'c'],
-                tileProvider: FMTCStore("mapStore").getTileProvider(),
-              ),
-              GestureDetector(
-                  child: PolylineLayer(
-                    polylines: [
-                      Polyline(
-                        points: _routeCoords, // Route coordinates
-                        color: Colors.blue.withOpacity(0.4), // Route color
-                        strokeWidth: 4.0, // Route width
-                      ),
-                    ],
-                  ),
-                  onTap: () async {
-                    _getRoute(_currentLocation!, _destination!);
-                  }),
-              AnimatedMarkerLayer(
-                markers: [
-                  if (_currentLocation != null)
-                    MyMarker(
-                      point: _currentLocation!,
-                      icon: UserLocationMarker(
+              children: [
+                TileLayer(
+                  urlTemplate:
+                      "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+                  subdomains: const ['a', 'b', 'c'],
+                  tileProvider: FMTCStore("mapStore").getTileProvider(),
+                ),
+                GestureDetector(
+                    child: PolylineLayer(
+                      polylines: [
+                        Polyline(
+                          points: _routeCoords, // Route coordinates
+                          color: Colors.blue.withOpacity(0.4), // Route color
+                          strokeWidth: 4.0, // Route width
+                        ),
+                      ],
+                    ),
+                    onTap: () async {
+                      _getRoute(_currentLocation!, _destination!);
+                    }),
+                AnimatedMarkerLayer(
+                  markers: [
+                    if (_currentLocation != null)
+                      MyMarker(
                         point: _currentLocation!,
-                        heading: _heading,
+                        icon: UserLocationMarker(
+                          point: _currentLocation!,
+                          heading: _heading,
+                        ),
+                        onTap: (LatLng point) async {
+                          _centerOnUserLocation();
+                        },
+                      ),
+                    MyMarker(
+                      point: const LatLng(48.8594, 2.3138),
+                      icon: Icon(
+                        Icons.location_on,
+                        color: Colors.red,
+                        size: 50.0,
                       ),
                       onTap: (LatLng point) async {
-                        _centerOnUserLocation();
+                        _destination = point;
+                        _getRoute(_currentLocation!, point);
                       },
                     ),
-                  MyMarker(
-                    point: const LatLng(48.8594, 2.3138),
-                    icon: Icon(
-                      Icons.location_on,
-                      color: Colors.red,
-                      size: 50.0,
+                    MyMarker(
+                      point: const LatLng(48.85608312652121, 2.297967035877974),
+                      icon: Icon(
+                        Icons.location_on,
+                        color: Colors.red,
+                        size: 50.0,
+                      ),
+                      onTap: (LatLng point) async {
+                        _destination = point;
+                        _getRoute(_currentLocation!, point);
+                      },
                     ),
-                    onTap: (LatLng point) async {
-                      _destination = point;
-                      _getRoute(_currentLocation!, point);
-                    },
-                  ),
-                  MyMarker(
-                    point: const LatLng(48.85608312652121, 2.297967035877974),
-                    icon: Icon(
-                      Icons.location_on,
-                      color: Colors.red,
-                      size: 50.0,
+                    MyMarker(
+                      point:
+                          const LatLng(43.65905756427601, 7.1953319013893084),
+                      icon: Icon(
+                        Icons.location_on,
+                        color: Colors.red,
+                        size: 50.0,
+                      ),
+                      onTap: (LatLng point) async {
+                        _destination = point;
+                        _getRoute(_currentLocation!, point);
+                      },
                     ),
-                    onTap: (LatLng point) async {
-                      _destination = point;
-                      _getRoute(_currentLocation!, point);
-                    },
-                  ),
-                  MyMarker(
-                    point: const LatLng(43.65905756427601, 7.1953319013893084),
-                    icon: Icon(
-                      Icons.location_on,
-                      color: Colors.red,
-                      size: 50.0,
+                    MyMarker(
+                      point: const LatLng(43.69506468906737, 7.268872874437284),
+                      icon: Icon(
+                        Icons.location_on,
+                        color: Colors.red,
+                        size: 50.0,
+                      ),
+                      onTap: (LatLng point) async {
+                        _destination = point;
+                        _getRoute(_currentLocation!, point);
+                      },
                     ),
-                    onTap: (LatLng point) async {
-                      _destination = point;
-                      _getRoute(_currentLocation!, point);
-                    },
-                  ),
-                  MyMarker(
-                    point: const LatLng(43.69506468906737, 7.268872874437284),
-                    icon: Icon(
-                      Icons.location_on,
-                      color: Colors.red,
-                      size: 50.0,
+                    MyMarker(
+                      point: const LatLng(43.65694065307015, 7.183261174229134),
+                      icon: Icon(
+                        Icons.location_on,
+                        color: Colors.red,
+                        size: 50.0,
+                      ),
+                      onTap: (LatLng point) async {
+                        _destination = point;
+                        _getRoute(_currentLocation!, point);
+                      },
                     ),
-                    onTap: (LatLng point) async {
-                      _destination = point;
-                      _getRoute(_currentLocation!, point);
-                    },
-                  ),
-                  MyMarker(
-                    point: const LatLng(43.65694065307015, 7.183261174229134),
-                    icon: Icon(
-                      Icons.location_on,
-                      color: Colors.red,
-                      size: 50.0,
-                    ),
-                    onTap: (LatLng point) async {
-                      _destination = point;
-                      _getRoute(_currentLocation!, point);
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-          if (_orientationChanged)
-            Positioned(
-              top: 60.0,
-              right: 16.0,
-              child: FloatingActionButton(
-                onPressed: () {
-                  _animatedMapController.animatedRotateReset();
-                  setState(() {
-                    _orientationChanged = false;
-                  });
-                },
-                child: const Icon(Icons.explore),
-              ),
-            ),
-          if (_currentLocation == null)
-            Column(
-              children: [
-                SizedBox(
-                  height: 80,
+                  ],
                 ),
-                Center(
-                  child: Container(
-                    decoration: BoxDecoration(
-                        color: Colors.blue,
-                        borderRadius: BorderRadius.all(Radius.circular(30))),
-                    child: Padding(
-                      padding: const EdgeInsets.all(14.0),
-                      child: Shimmer.fromColors(
-                        baseColor: Colors.white,
-                        highlightColor: Colors.blueAccent,
-                        child: Text(
-                          "Searching for location...",
-                          style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700),
+              ],
+            ),
+            if (_orientationChanged)
+              Positioned(
+                top: 60.0,
+                right: 16.0,
+                child: FloatingActionButton(
+                  onPressed: () {
+                    _animatedMapController.animatedRotateReset();
+                    setState(() {
+                      _orientationChanged = false;
+                    });
+                  },
+                  child: const Icon(Icons.explore),
+                ),
+              ),
+            if (_currentLocation == null)
+              Column(
+                children: [
+                  SizedBox(
+                    height: 80,
+                  ),
+                  Center(
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.all(Radius.circular(30))),
+                      child: Padding(
+                        padding: const EdgeInsets.all(14.0),
+                        child: Shimmer.fromColors(
+                          baseColor: Colors.white,
+                          highlightColor: Colors.blueAccent,
+                          child: Text(
+                            "Searching for location...",
+                            style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700),
+                          ),
                         ),
                       ),
                     ),
                   ),
+                ],
+              )
+          ],
+        ),
+        floatingActionButton:
+            Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+          Container(
+            height: 45,
+            width: 45,
+            child: FloatingActionButton(
+                child: Icon(Icons.zoom_in_outlined),
+                onPressed: () {
+                  _animatedMapController.animatedZoomIn();
+                }),
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Container(
+            height: 45,
+            width: 45,
+            child: FloatingActionButton(
+                child: Icon(Icons.zoom_out_outlined),
+                onPressed: () {
+                  _animatedMapController.animatedZoomOut();
+                }),
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          (_currentLocation != null)
+              ? FloatingActionButton(
+                  onPressed: _centerOnUserLocation,
+                  child: const Icon(Icons.my_location),
+                )
+              : FloatingActionButton(
+                  onPressed: null,
+                  child: Padding(
+                    padding: const EdgeInsets.all(14.0),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 6,
+                    ),
+                  ),
                 ),
-              ],
-            )
-        ],
-      ),
-      floatingActionButton: (_currentLocation != null)
-          ? FloatingActionButton(
-              onPressed: _centerOnUserLocation,
-              child: const Icon(Icons.my_location),
-            )
-          : FloatingActionButton(
-              onPressed: null,
-              child: Padding(
-                padding: const EdgeInsets.all(14.0),
-                child: CircularProgressIndicator(
-                  strokeWidth: 6,
-                ),
-              ),
-            ),
-    );
+        ]));
   }
 }
